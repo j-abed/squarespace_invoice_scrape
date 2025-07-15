@@ -1,2 +1,6 @@
 .env
+cookies.json
 invoices/
+invoices/*.pdf
+invoices/*.csv
+full_storage.json
