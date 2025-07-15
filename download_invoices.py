@@ -4,6 +4,8 @@ from datetime import datetime
 from playwright.async_api import async_playwright
 from dotenv import load_dotenv
 
+import extract_invoice_data
+
 # ── Load env vars ────────────────────────────────────────────────────
 load_dotenv()
 SITE_SLUG      = os.getenv("SS_SITE_SLUG")
@@ -96,8 +98,17 @@ async def main():
             )
 
 
-            csv_append(dt.date().isoformat(), inv_id, amount, fname)
-            print(f"✅  Saved & indexed {fname}")
+            # ── Parse amount (and other fields) from the newly‑saved PDF ──
+            info = extract_invoice_data.extract_invoice_data(fpath)
+
+            csv_append(
+                dt.date().isoformat(),       # date column
+                info["invoice_number"],      # ID column (matches inv_id)
+                info["amount_paid"],         # amount from PDF
+                fname                        # filename
+            )
+            print(f"✅  Saved & indexed {fname} – Paid ${info['amount_paid']}")
+
 
             # back to list and continue
             await page.go_back(wait_until="networkidle")
